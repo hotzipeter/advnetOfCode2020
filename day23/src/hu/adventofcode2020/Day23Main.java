@@ -1,50 +1,41 @@
 package hu.adventofcode2020;
 
-import org.apache.commons.collections4.list.CursorableLinkedList;
-
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class Day23Main {
 
     public static void main(String[] args) throws FileNotFoundException {
-        CursorableLinkedList<Integer> cups = new CursorableLinkedList<>(Arrays.asList(9, 6, 2, 7, 1, 3, 8, 5, 4));
-//        CursorableLinkedList<Integer> cups = new CursorableLinkedList<>(Arrays.asList(3,8,9,1,2,5,4,6,7));
-//        List<Integer> cups = new ArrayList<>(Arrays.asList(3,8,9,1,2,5,4,6,7));
-        Map<Integer, ListIterator<Integer>> cupIteratorMap = new HashMap<>();
+        ArrayList<Integer> cups = new ArrayList<>(Arrays.asList(9, 6, 2, 7, 1, 3, 8, 5, 4));
+//        ArrayList<Integer> cups = new ArrayList<>(Arrays.asList(3,8,9,1,2,5,4,6,7));
 
+        Map<Integer, Integer> cupIteratorMap = new HashMap<>();
 
-        int max = 9;
-        for (int index = 10; index <= max; index++) {
-            cups.add(index);
-        }
-        for (int index=0;index<cups.size();index++) {
-            ListIterator<Integer> iterator = cups.listIterator(index);
-            cupIteratorMap.put(iterator.next(), iterator);
-            long end = new Date().getTime();
-        }
-        int numberOfRounds = 100;
-        int originalSize = cups.size();
-
-        for (int roundCounter = 1; roundCounter <= numberOfRounds; roundCounter++) {
-//            System.out.println("-- move "+roundCounter+" --");
-//            System.out.print("cups: ");
-//            for (Integer cup : cups) {
-//                System.out.print(cup);
-//            }
-//            System.out.println();
-            int indexOfCurrentLabel = 0;
-            long begin = new Date().getTime();
-            int currentLabel = cups.getFirst();
-            List<Integer> choosenCups = new LinkedList<>();
-            ListIterator<Integer> iterator = cups.listIterator();
-            iterator.next();
-            for (int index = 0; index < 3; index++) {
-                      choosenCups.add(iterator.next());
-                      iterator.remove();
+        int max = 1000000;
+        for (int index = 1; index <= max; index++) {
+            if (index<=8) {
+                cupIteratorMap.put(cups.get(index-1),cups.get(index));
+            } else if (index == 9) {
+                cupIteratorMap.put(cups.get(index-1),max<=9 ? cups.get(0):index+1);
+            } else {
+                cupIteratorMap.put(index,index==max ? cups.get(0):index+1);
             }
+        }
+
+
+        int numberOfRounds = 10000000;
+        int currentLabel = cups.get(0);
+        for (int roundCounter = 1; roundCounter <= numberOfRounds; roundCounter++) {
+
+            long begin = new Date().getTime();
+
+            List<Integer> choosenCups = new LinkedList<>();
+            int iteratorNum = currentLabel;
+            for (int index = 0; index < 3; index++) {
+                      iteratorNum= cupIteratorMap.get(iteratorNum);
+                      choosenCups.add(iteratorNum);
+            }
+            cupIteratorMap.put(currentLabel, cupIteratorMap.get(iteratorNum));
 //            System.out.print("pick up: ");
 //            for (int index=0;index<3;index++) {
 //                System.out.print(choosenCups.get(index));
@@ -55,48 +46,28 @@ public class Day23Main {
             while (choosenCups.contains(destinationLabel) || destinationLabel == 0) {
                 destinationLabel--;
                 if (destinationLabel <= 0) {
-                    destinationLabel = originalSize;
+                    destinationLabel = max;
                 }
             }
 
-//            System.out.print(destinationLabel);
-//            System.out.println();
-//            int destIndex = cups.indexOf(destinationLabel);
-//            cups.addAll((destIndex + 1) % originalSize, choosenCups);
-            ListIterator<Integer> choosenIterator = choosenCups.listIterator();
-            ListIterator<Integer> destIterator = cupIteratorMap.get(destinationLabel);
-            int fistValue = choosenIterator.next();
-            int secondValue = choosenIterator.next();
-            int thirdValue = choosenIterator.next();
-            destIterator.previous();
-            int destIndex=destIterator.nextIndex();
-            destIterator.next();
-            destIterator.add(thirdValue);
-            destIterator.previous();
-            destIterator.add(secondValue);
-            destIterator.previous();
-            destIterator.add(fistValue);
-            cupIteratorMap.put(destinationLabel,cups.listIterator(destIndex+1));
-            cupIteratorMap.put(fistValue,cups.listIterator(destIndex+2));
-            cupIteratorMap.put(secondValue,cups.listIterator(destIndex+3));
-            cupIteratorMap.put(thirdValue,cups.listIterator(destIndex+4));
-//            for (int index = 0; index < 3; index++) {
-//                ListIterator<Integer> destIterator = cupIteratorMap.get(destinationLabel);
-//                int value = choosenIterator.previous();
-//                destIterator.add(value);
-//                destIterator.previous();
-//            }
-            int value =cups.removeFirst();
-            cups.addLast(value);
-            cupIteratorMap.put(value,cups.listIterator(cups.size()));
+            int destNum = cupIteratorMap.get(destinationLabel);
+            cupIteratorMap.put(destinationLabel,choosenCups.get(0));
+            cupIteratorMap.put(choosenCups.get(2),destNum);
+            currentLabel = cupIteratorMap.get(currentLabel);
 
-            long end = new Date().getTime();
-            System.out.println(end-begin);
         }
         System.out.println("-- final --");
-        for (Integer cup : cups) {
-            System.out.print(cup);
-        }
+        int num = 1;
+        int num2 = cupIteratorMap.get(num);
+        int num3 = cupIteratorMap.get(num2);
+        long multyp = (long) num2 * (long) num3;
+
+        System.out.println(num2+" "+num3);
+        System.out.println(multyp);
+//        for (int index=1;index<=max;index++) {
+//            num = cupIteratorMap.get(num);
+//            System.out.print(num);
+//        }
 
         System.out.println();
     }
